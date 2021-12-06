@@ -1,0 +1,30 @@
+echo "# es144_miniproject" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/jlborja/es144_miniproject.git
+git push -u origin main
+
+# copied from 'https://github.com/tonmcg/US_County_Level_Election_Results_08-20/blob/master/README.md'
+
+mkdir cartography
+cd cartography
+mkdir 2020 2016 2012 2008
+
+cd 2020
+
+curl 'https://www2.census.gov/geo/tiger/GENZ2019/shp/cb_2019_us_county_500k.zip' \
+    -o cb_2019_us_county_500k.zip
+unzip cb_2019_us_county_500k.zip
+
+mapshaper \
+    -i cb_2019_us_county_500k.shp name=us_counties \
+    -filter 'STATEFP !== "02" && STATEFP !== "69" && STATEFP !== "66" && STATEFP !== "78" && STATEFP !== "60" && STATEFP !== "72"' \
+    -each 'geoid=STATEFP + COUNTYFP,state_fips=STATEFP,county_name=NAME' \
+    -filter-fields 'geoid,state_fips,county_name' \
+    -simplify 2% \
+    -proj albersusa \
+    -o format=topojson us_counties.json \
+    -o format=geojson us_counties.geojson
+
